@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Colores</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+  .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6vmin}
+  .screen.show{display:flex}
+
+  /* ---- Inicio ---- */
+  #start{background:radial-gradient(circle at 50% 28%,#1b2431,#0b0f14)}
+  .title{color:#fff;font-size:13vmin;font-weight:800;letter-spacing:.02em;margin:0 0 1vmin}
+  .sub{color:#9fb0c3;font-size:4.6vmin;margin:0 0 8vmin}
+  .btn-start{background:#E53935;color:#fff;border:none;border-radius:6vmin;font-size:9vmin;font-weight:800;padding:5vmin 13vmin;box-shadow:0 1vmin 0 #a92622,0 2vmin 4vmin rgba(0,0,0,.45);cursor:pointer}
+  .btn-start:active{transform:translateY(1vmin);box-shadow:0 0 0 #a92622,0 1vmin 2vmin rgba(0,0,0,.45)}
+  .btn-level{margin-top:7vmin;background:transparent;color:#dfe8f2;border:.7vmin solid #3a4a5e;border-radius:5vmin;font-size:5vmin;font-weight:700;padding:3vmin 7vmin;cursor:pointer}
+  .btn-level:active{background:rgba(255,255,255,.06)}
+  .hint{color:#6b7c90;font-size:3.4vmin;margin-top:7vmin;line-height:1.5}
+  .warn{color:#e0a34a;font-size:3.3vmin;margin-top:3vmin;padding:0 4vmin;line-height:1.4}
+
+  /* ---- Juego ---- */
+  #play{justify-content:center;transition:background .25s}
+  .prompt{position:absolute;top:7vmin;left:0;right:0;font-size:6vmin;font-weight:800;color:#fff;text-shadow:0 .3vmin 1.2vmin rgba(0,0,0,.28)}
+  .mic{width:46vmin;height:46vmin;border-radius:50%;border:none;background:#fff;color:#1f2632;font-size:22vmin;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 1.5vmin 0 rgba(0,0,0,.18),0 2vmin 5vmin rgba(0,0,0,.3);cursor:pointer}
+  .mic:active{transform:scale(.96)}
+  .state{margin-top:6vmin;font-size:5vmin;font-weight:700;color:#fff;text-shadow:0 .3vmin 1.2vmin rgba(0,0,0,.28);min-height:6vmin}
+  .progress{position:absolute;top:7vmin;left:6vmin;font-size:5vmin;font-weight:800;color:#fff;opacity:.85}
+  .skip{position:absolute;bottom:5vmin;right:6vmin;font-size:7vmin;line-height:1;color:#fff;opacity:.3;background:none;border:none;cursor:pointer;padding:2vmin}
+  /* Fondos claros (amarillo, blanco, naranja): UI oscura */
+  #play.on-light .prompt,#play.on-light .state,#play.on-light .progress{color:#1a1a1a;text-shadow:none}
+  #play.on-light .mic{background:#1f2632;color:#fff}
+  #play.on-light .skip{color:#1a1a1a}
+  body.listening .mic{animation:pulse .9s infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+
+  /* ---- Celebración ---- */
+  .celebrate{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.22);z-index:20}
+  .celebrate.show{display:flex}
+  .cheer{font-size:15vmin;font-weight:900;color:#fff;text-shadow:0 0 6vmin rgba(255,255,255,.55),0 1vmin 2vmin rgba(0,0,0,.45);animation:pop .5s ease}
+  @keyframes pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.18)}100%{transform:scale(1);opacity:1}}
+
+  /* ---- Final ---- */
+  #end{background:radial-gradient(circle at 50% 28%,#15304a,#0b0f14)}
+  .stars{font-size:13vmin;margin-bottom:4vmin}
+  .big{color:#fff;font-size:11vmin;font-weight:900;margin:0 0 7vmin}
+  .btn2{background:#43A047;color:#fff;border:none;border-radius:5vmin;font-size:6.5vmin;font-weight:800;padding:4vmin 9vmin;margin:2vmin;box-shadow:0 1vmin 0 #2e7d32;cursor:pointer}
+  .btn2:active{transform:translateY(.6vmin);box-shadow:0 .4vmin 0 #2e7d32}
+  .btn2.alt{background:transparent;border:.7vmin solid #3a4a5e;color:#dfe8f2;box-shadow:none;font-size:5vmin;font-weight:700}
+
+  .confetti{position:fixed;top:-10vmin;z-index:19;animation:fall linear forwards;pointer-events:none}
+  @keyframes fall{to{transform:translateY(120vh) rotate(400deg)}}
+</style>
+</head>
+<body>
+
+  <section id="start" class="screen show">
+    <h1 class="title">Colores</h1>
+    <p class="sub">Di el color y gana 🎉</p>
+    <button class="btn-start" id="startBtn">INICIA</button>
+    <button class="btn-level" id="levelBtn">Nivel: Fácil (3)</button>
+    <p class="hint">Con voz · Necesita internet · Sube el volumen 🔊</p>
+    <p class="warn" id="warn"></p>
+  </section>
+
+  <section id="play" class="screen">
+    <div class="progress" id="prog">1/3</div>
+    <div class="prompt" id="prompt">¿De qué color es?</div>
+    <button class="mic" id="micBtn" aria-label="Hablar">🎤</button>
+    <div class="state" id="state">Toca y di el color</div>
+    <button class="skip" id="skipBtn" aria-label="Saltar">▸</button>
+  </section>
+
+  <section id="end" class="screen">
+    <div class="stars">⭐️⭐️⭐️</div>
+    <h1 class="big">¡Lo lograste!</h1>
+    <button class="btn2" id="againBtn">Jugar de nuevo</button>
+    <button class="btn2 alt" id="homeBtn">Cambiar nivel</button>
+  </section>
+
+  <div class="celebrate" id="celebrate"><div class="cheer" id="cheer">¡MUY BIEN!</div></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Datos ----------
+  var COLORS = {
+    rojo:    {hex:'#E53935', words:['rojo','roja','colorado']},
+    azul:    {hex:'#1E88E5', words:['azul','azules']},
+    amarillo:{hex:'#FDD835', words:['amarillo','amarilla']},
+    verde:   {hex:'#43A047', words:['verde','verdes']},
+    naranja: {hex:'#FB8C00', words:['naranja','naranjo','anaranjado','anaranjada']},
+    morado:  {hex:'#8E24AA', words:['morado','morada','lila','violeta','purpura','morao']},
+    rosado:  {hex:'#EC407A', words:['rosado','rosada','rosa','rosao']},
+    cafe:    {hex:'#6D4C41', words:['cafe','marron','marrones']},
+    negro:   {hex:'#1A1A1A', words:['negro','negra']},
+    blanco:  {hex:'#FFFFFF', words:['blanco','blanca']}
+  };
+  var ORDER = ['rojo','azul','amarillo','verde','naranja','morado','rosado','cafe','negro','blanco'];
+  var SAY = {rojo:'rojo',azul:'azul',amarillo:'amarillo',verde:'verde',naranja:'naranja',morado:'morado',rosado:'rosado',cafe:'café',negro:'negro',blanco:'blanco'};
+  var LEVELS = {facil:3, medio:6, dificil:10};
+  var LEVEL_SEQ = ['facil','medio','dificil'];
+  var LEVEL_LABEL = {facil:'Fácil', medio:'Medio', dificil:'Difícil'};
+
+  // ---------- Estado ----------
+  var level = 'facil', lvlIdx = 0;
+  var queue = [], idx = 0, attempts = 0;
+  var listening = false, busy = false, recognition = null;
+  var currentLang = 'es-CL';
+
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  // ---------- Utilidades ----------
+  function $(id){ return document.getElementById(id); }
+  function norm(s){
+    return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+      .replace(/[^a-z\s]/g,' ').replace(/\s+/g,' ').trim();
+  }
+  function matches(list, key){
+    var words = COLORS[key].words;
+    for(var i=0;i<list.length;i++){
+      var n = ' ' + norm(list[i]) + ' ';
+      for(var j=0;j<words.length;j++){ if(n.indexOf(' '+words[j]+' ') !== -1) return true; }
+    }
+    return false;
+  }
+  function shuffle(a){
+    for(var i=a.length-1;i>0;i--){ var k=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[k]; a[k]=t; }
+    return a;
+  }
+  function luminance(hex){
+    var c=hex.substring(1);
+    var r=parseInt(c.substr(0,2),16), g=parseInt(c.substr(2,2),16), b=parseInt(c.substr(4,2),16);
+    return (0.299*r + 0.587*g + 0.114*b)/255;
+  }
+  function showScreen(id){
+    var s=document.querySelectorAll('.screen');
+    for(var i=0;i<s.length;i++) s[i].classList.remove('show');
+    $(id).classList.add('show');
+  }
+  function setState(t){ $('state').textContent = t; }
+
+  // ---------- Voz de la app (TTS) ----------
+  var esVoice = null;
+  function pickVoice(){
+    if(!window.speechSynthesis) return;
+    var vs = window.speechSynthesis.getVoices() || [];
+    var pref = ['es-cl','es-419','es-us','es-mx','es-es'];
+    for(var p=0;p<pref.length;p++){
+      for(var i=0;i<vs.length;i++){ if(vs[i].lang && vs[i].lang.toLowerCase()===pref[p]){ esVoice=vs[i]; return; } }
+    }
+    for(var k=0;k<vs.length;k++){ if(vs[k].lang && vs[k].lang.toLowerCase().indexOf('es')===0){ esVoice=vs[k]; return; } }
+  }
+  if(window.speechSynthesis){ window.speechSynthesis.onvoiceschanged = pickVoice; pickVoice(); }
+  function say(text, cb){
+    if(!window.speechSynthesis){ if(cb) cb(); return; }
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang='es-CL'; if(esVoice) u.voice=esVoice; u.rate=0.95; u.pitch=1.15;
+    if(cb) u.onend=cb;
+    try{ window.speechSynthesis.speak(u); }catch(e){ if(cb) cb(); }
+  }
+
+  // ---------- Pintar color ----------
+  function paint(key){
+    var play=$('play');
+    play.style.background = COLORS[key].hex;
+    play.classList.toggle('on-light', luminance(COLORS[key].hex) > 0.6);
+  }
+
+  // ---------- Flujo ----------
+  function startGame(){
+    var n = LEVELS[level];
+    queue = shuffle(ORDER.slice()).slice(0, n);
+    idx = 0; busy=false;
+    showScreen('play');
+    nextColor();
+  }
+  function nextColor(){
+    if(idx >= queue.length){ finish(); return; }
+    attempts = 0;
+    paint(queue[idx]);
+    $('prog').textContent = (idx+1) + '/' + queue.length;
+    setState('Toca y di el color');
+    say('¿De qué color es?');
+  }
+  function onTalk(){
+    if(busy || listening) return;
+    if(!SR){ success(); return; }   // sin reconocimiento: avanza al tocar
+    listen();
+  }
+  function listen(){
+    listening = true; document.body.classList.add('listening'); setState('Escuchando…');
+    try{ if(window.speechSynthesis) window.speechSynthesis.cancel(); }catch(e){}
+    var rec;
+    try{ rec = new SR(); }catch(e){ listening=false; document.body.classList.remove('listening'); success(); return; }
+    recognition = rec;
+    rec.lang = currentLang; rec.interimResults=false; rec.maxAlternatives=5; rec.continuous=false;
+    var resolved = false;
+    function done(fn){
+      if(resolved) return; resolved=true;
+      listening=false; document.body.classList.remove('listening');
+      fn();
+    }
+    var safety = setTimeout(function(){ try{ rec.stop(); }catch(e){} }, 6000);
+    rec.onresult = function(e){
+      var res = e.results[0], alts = [];
+      for(var i=0;i<res.length;i++) alts.push(res[i].transcript);
+      clearTimeout(safety);
+      done(function(){ handleHeard(alts); });
+    };
+    rec.onerror = function(e){
+      if(e && e.error==='language-not-supported' && currentLang!=='es-ES'){
+        currentLang='es-ES'; clearTimeout(safety); resolved=true;
+        listening=false; document.body.classList.remove('listening'); listen(); return;
+      }
+      // otros errores: onend resolverá como intento fallido
+    };
+    rec.onend = function(){ clearTimeout(safety); done(function(){ miss(); }); };
+    try{ rec.start(); }
+    catch(err){ clearTimeout(safety); done(function(){ miss(); }); }
+  }
+  function handleHeard(alts){
+    if(matches(alts, queue[idx])) success(); else miss();
+  }
+  function miss(){
+    if(busy) return;
+    attempts++;
+    if(attempts >= 3){ success(); return; }        // permisivo: pasa tras 3 intentos
+    var key = queue[idx];
+    if(attempts === 2){ setState('Escucha la pista…'); say('Es ' + SAY[key] + '. Ahora di ' + SAY[key]); }
+    else { setState('¡Otra vez! Toca y habla'); say('¿De qué color es?'); }
+  }
+  function success(){
+    if(busy) return; busy = true;
+    listening = false; document.body.classList.remove('listening');
+    setState('');
+    $('celebrate').classList.add('show');
+    confetti(14);
+    say('¡Muy bien!');
+    setTimeout(function(){
+      $('celebrate').classList.remove('show');
+      busy = false; idx++; nextColor();
+    }, 2600);
+  }
+  function finish(){
+    showScreen('end');
+    confetti(34);
+    say('¡Lo lograste! ¡Bravo!');
+  }
+
+  // ---------- Confeti ----------
+  function confetti(n){
+    var em=['🎉','⭐','🎈','✨','👏','🌈'];
+    for(var i=0;i<n;i++){
+      (function(){
+        var s=document.createElement('div'); s.className='confetti';
+        s.textContent=em[Math.floor(Math.random()*em.length)];
+        s.style.left=(Math.random()*100)+'vw';
+        var d=1.4+Math.random()*1.5; s.style.animationDuration=d+'s';
+        s.style.fontSize=(4+Math.random()*5)+'vmin';
+        document.body.appendChild(s);
+        setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); }, d*1000+250);
+      })();
+    }
+  }
+
+  // ---------- PWA: manifiesto + ícono en memoria ----------
+  function buildPWA(){
+    try{
+      var cv=document.createElement('canvas'); cv.width=cv.height=512;
+      var x=cv.getContext('2d');
+      x.fillStyle='#0b0f14'; x.fillRect(0,0,512,512);
+      var cols=['#E53935','#1E88E5','#FDD835','#43A047','#FB8C00','#8E24AA','#EC407A','#43C6DB'];
+      var cx=256, cy=256, R=150, r=64;
+      for(var i=0;i<cols.length;i++){
+        var a=(i/cols.length)*Math.PI*2 - Math.PI/2;
+        x.beginPath(); x.arc(cx+Math.cos(a)*R, cy+Math.sin(a)*R, r, 0, Math.PI*2);
+        x.fillStyle=cols[i]; x.fill();
+      }
+      x.beginPath(); x.arc(cx,cy,74,0,Math.PI*2); x.fillStyle='#fff'; x.fill();
+      var icon=cv.toDataURL('image/png');
+      var manifest={name:'Colores',short_name:'Colores',start_url:'.',scope:'.',display:'standalone',
+        orientation:'portrait',background_color:'#0b0f14',theme_color:'#0b0f14',
+        icons:[{src:icon,sizes:'512x512',type:'image/png',purpose:'any'}]};
+      var blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+      var link=document.createElement('link'); link.rel='manifest'; link.href=URL.createObjectURL(blob);
+      document.head.appendChild(link);
+      var al=document.createElement('link'); al.rel='apple-touch-icon'; al.href=icon; document.head.appendChild(al);
+    }catch(e){}
+  }
+
+  // ---------- Eventos ----------
+  $('startBtn').addEventListener('click', startGame);
+  $('levelBtn').addEventListener('click', function(){
+    lvlIdx = (lvlIdx+1)%3; level = LEVEL_SEQ[lvlIdx];
+    $('levelBtn').textContent = 'Nivel: ' + LEVEL_LABEL[level] + ' (' + LEVELS[level] + ')';
+  });
+  $('play').addEventListener('click', function(e){
+    if(e.target && e.target.id==='skipBtn') return;
+    onTalk();
+  });
+  $('skipBtn').addEventListener('click', function(e){ e.stopPropagation(); success(); });
+  $('againBtn').addEventListener('click', startGame);
+  $('homeBtn').addEventListener('click', function(){ showScreen('start'); });
+
+  if(!SR){ $('warn').textContent = 'Este navegador no reconoce voz. Abre el juego en Chrome. Por ahora, avanza tocando la pantalla.'; }
+
+  buildPWA();
+})();
+</script>
+</body>
+</html>
